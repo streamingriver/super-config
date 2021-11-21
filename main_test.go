@@ -46,7 +46,7 @@ var programsDataCache = []byte(`
 `)
 
 var programsDataFfmpegExpected = `[program:test]
-command=/bin/bash -c "mkdir -p /dev/shm/test; cd /dev/shm/test; /ffmpeg -nostats -nostdin -user-agent "streamingriveriptv/1.0" -i "http://test" -codec copy -map 0:0 -map 0:1 -map_metadata 0  -f hls -hls_list_size 3 -hls_flags delete_segments -hls_time 5 -segment_list_size 3 -hls_segment_filename file%%%%07d.ts stream.m3u8"
+command=/bin/bash -c "mkdir -p /dev/shm/test; cd /dev/shm/test; /ffmpeg -nostats -nostdin -user-agent "streamingriveriptv/1.0" -i "http://test" -codec copy -map 0:0 -map 0:1 -map_metadata 0  -f hls -hls_list_size 3 -hls_flags delete_segments -hls_time 5 -segment_list_size 3 -hls_segment_filename file%%07d.ts stream.m3u8"
 autostart = true
 startsec = 1
 user = root
@@ -62,7 +62,7 @@ stdout_events_enabled=true
 stderr_events_enabled=true
 
 [program:anothertest1]
-command=/bin/bash -c "mkdir -p /dev/shm/anothertest1; cd /dev/shm/anothertest1; /ffmpeg -nostats -nostdin -user-agent "streamingriveriptv/1.0" -i "http://anothertest1" -codec copy -map 0:0 -map 0:1 -map_metadata 0  -f hls -hls_list_size 3 -hls_flags delete_segments -hls_time 5 -segment_list_size 3 -hls_segment_filename file%%%%07d.ts stream.m3u8"
+command=/bin/bash -c "mkdir -p /dev/shm/anothertest1; cd /dev/shm/anothertest1; /ffmpeg -nostats -nostdin -user-agent "streamingriveriptv/1.0" -i "http://anothertest1" -codec copy -map 0:0 -map 0:1 -map_metadata 0  -f hls -hls_list_size 3 -hls_flags delete_segments -hls_time 5 -segment_list_size 3 -hls_segment_filename file%%07d.ts stream.m3u8"
 autostart = true
 startsec = 1
 user = root
@@ -136,7 +136,7 @@ func TestParserFFMPEG(t *testing.T) {
 	parser.Parse(programsDataFfmpeg)
 
 	if string(writer.buff.Bytes()) != programsDataFfmpegExpected {
-		t.Errorf("Unexpected output,")
+		t.Errorf("Unexpected output, %s", writer.buff.String())
 	}
 }
 

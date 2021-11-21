@@ -19,7 +19,8 @@ type App struct {
 	parserType string
 	path       string
 
-	exit chan struct{}
+	testing bool
+	exit    chan struct{}
 }
 
 func (app *App) initLogger() {
@@ -38,7 +39,11 @@ func (app *App) ConnectToNats() {
 	var err error
 	app.conn, err = nats.Connect(app.natsURL)
 	if err != nil {
-		app.logger.Printf("%v", err)
+		if app.testing {
+			app.logger.Printf("%v", err)
+			return
+		}
+		app.logger.Fatalf("%v", err)
 	}
 }
 
@@ -48,7 +53,11 @@ func (app *App) Subscribe() {
 		app.parser.Parse(msg.Data)
 	})
 	if err != nil {
-		app.logger.Printf("%v", err)
+		if app.testing {
+			app.logger.Printf("%v", err)
+			return
+		}
+		app.logger.Fatalf("%v", err)
 	}
 }
 

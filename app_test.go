@@ -46,6 +46,7 @@ func TestConnectToNatsShouldFail(t *testing.T) {
 	writer := &LogWriter{t, bytes.NewBuffer(nil)}
 	app := new(App)
 	app.init()
+	app.testing = true
 	app.logger = log.New(writer, "", 0)
 	go func() {
 		app.ConnectToNats()
@@ -64,6 +65,7 @@ func TestNatsSubscribeShouldFail(t *testing.T) {
 
 	writer := &LogWriter{t, bytes.NewBuffer(nil)}
 	app := new(App)
+	app.testing = true
 	app.init()
 	app.logger = log.New(writer, "", 0)
 	go func() {

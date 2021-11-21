@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// Supervisor generates real config files
 type Supervisor struct {
 	App    *App
 	Logger *log.Logger
@@ -62,10 +63,12 @@ stderr_events_enabled=true
 	return template
 }
 
+// GenerateFFMPEG file
 func (sv *Supervisor) GenerateFFMPEG(programs []Program) {
 	sv.generate(programs, "ffmpeg")
 }
 
+// GenerateCache file
 func (sv *Supervisor) GenerateCache(programs []Program) {
 	sv.generate(programs, "cache")
 }

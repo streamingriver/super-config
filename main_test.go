@@ -126,11 +126,12 @@ func (mw MyWriter) Close() error { return nil }
 
 func TestParserFFMPEG(t *testing.T) {
 	writer := &MyWriter{t, bytes.NewBuffer(nil)}
+	app := &App{}
 	parser := &Parser{
+		app,
 		log.New(&FakeLogOutput{t}, "", 0),
 		"ffmpeg",
 		writer,
-		"./",
 	}
 	parser.Parse(programsDataFfmpeg)
 
@@ -140,12 +141,13 @@ func TestParserFFMPEG(t *testing.T) {
 }
 
 func TestParserCache(t *testing.T) {
+	app := &App{}
 	writer := &MyWriter{t, bytes.NewBuffer(nil)}
 	parser := &Parser{
+		app,
 		log.New(&FakeLogOutput{t}, "", 0),
 		"cache",
 		writer,
-		"./",
 	}
 	parser.Parse(programsDataCache)
 

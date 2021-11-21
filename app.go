@@ -15,9 +15,11 @@ type App struct {
 	logger *log.Logger
 	conn   *nats.Conn
 
-	parser     *Parser
-	parserType string
-	path       string
+	parser         *Parser
+	parserType     string
+	path           string
+	ext            string
+	SupervisorPath string
 
 	testing bool
 	exit    chan struct{}
@@ -32,6 +34,8 @@ func (app *App) getEnvVariables() {
 	app.natsTopic = getenvs.GetEnvString("NATS_TOPIC", "super-config")
 	app.parserType = getenvs.GetEnvString("PARSER_TYPE", "ffmpeg")
 	app.path = getenvs.GetEnvString("CONFIG_PATH", "/etc/supervisor/conf.d/")
+	app.ext = getenvs.GetEnvString("CONFIG_EXT", ".conf")
+	app.SupervisorPath = getenvs.GetEnvString("SUPERVISORCTL", "supervisorctl")
 }
 
 //ConnectToNats server
@@ -66,7 +70,7 @@ func (app *App) init() {
 	app.initLogger()
 	app.exit = make(chan struct{})
 
-	app.parser = &Parser{app.logger, app.parserType, nil, app.path}
+	app.parser = &Parser{app, app.logger, app.parserType, nil}
 }
 
 // Run starts application

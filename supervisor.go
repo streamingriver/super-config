@@ -4,13 +4,14 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"os/exec"
 	"strings"
 )
 
 type Supervisor struct {
-	Output io.WriteCloser
+	App    *App
 	Logger *log.Logger
-	Path   string
+	Output io.WriteCloser
 }
 
 func (sv Supervisor) templateFFMPEG(name, url string) string {
@@ -85,5 +86,14 @@ func (sv *Supervisor) generate(programs []Program, t string) {
 		return
 	}
 
-	ioutil.WriteFile(sv.Path+"/"+t+".conf", []byte(output), 0755)
+	err := ioutil.WriteFile(sv.App.path+"/"+t+sv.App.ext, []byte(output), 0755)
+	sv.Logger.Printf("%s", err)
+}
+
+func (sv *Supervisor) reload() {
+	cmd := exec.Command(sv.App.SupervisorPath, "reload")
+	_, err := cmd.CombinedOutput()
+	if err != nil {
+
+	}
 }

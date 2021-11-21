@@ -15,6 +15,8 @@ func TestApp(t *testing.T) {
 	os.Setenv("NATS_URL", "nats-server")
 	os.Setenv("NATS_TOPIC", "nats-topic")
 	os.Setenv("PARSER_TYPE", "cache")
+	os.Setenv("CONFIG_PATH", "etc")
+	os.Setenv("CONFIG_EXT", ".conf")
 
 	app.init()
 
@@ -25,6 +27,12 @@ func TestApp(t *testing.T) {
 		t.Errorf("Wrong nats server %s", app.natsURL)
 	}
 	if app.parserType != "cache" {
+		t.Errorf("Wrong parser type %s", app.parserType)
+	}
+	if app.path != "etc" {
+		t.Errorf("Wrong parser type %s", app.parserType)
+	}
+	if app.ext != ".conf" {
 		t.Errorf("Wrong parser type %s", app.parserType)
 	}
 }

@@ -8,10 +8,10 @@ import (
 
 //Parser of nats messages
 type Parser struct {
+	App    *App
 	Logger *log.Logger
 	Type   string
 	Output io.WriteCloser
-	Path   string
 }
 
 // Parse nats message and take action
@@ -23,8 +23,8 @@ func (p *Parser) Parse(b []byte) {
 	}
 
 	if p.Type == "ffmpeg" {
-		(&Supervisor{Logger: p.Logger, Output: p.Output, Path: p.Path}).GenerateFFMPEG(programs.VideoFfmpeg)
+		(&Supervisor{App: p.App, Logger: p.Logger, Output: p.Output}).GenerateFFMPEG(programs.VideoFfmpeg)
 	} else {
-		(&Supervisor{Logger: p.Logger, Output: p.Output, Path: p.Path}).GenerateCache(programs.VideoCache)
+		(&Supervisor{App: p.App, Logger: p.Logger, Output: p.Output}).GenerateCache(programs.VideoCache)
 	}
 }

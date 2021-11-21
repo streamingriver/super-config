@@ -16,7 +16,7 @@ type Supervisor struct {
 
 func (sv Supervisor) templateFFMPEG(name, url string) string {
 	template := `[program:{{name}}]
-command=/bin/bash -c "mkdir -p /dev/shm/{{name}}; cd /dev/shm/{{name}}; /ffmpeg -nostats -nostdin -user-agent "streamingriveriptv/1.0" -i "{{url}}" -codec copy -map 0:0 -map 0:1 -map_metadata 0  -f hls -hls_list_size 3 -hls_flags delete_segments -hls_time 5 -segment_list_size 3 -hls_segment_filename file%%%%07d.ts stream.m3u8"
+command=/bin/bash -c "mkdir -p /dev/shm/{{name}}; cd /dev/shm/{{name}}; /ffmpeg -nostats -nostdin -user-agent "streamingriveriptv/1.0" -i "{{url}}" -codec copy -map 0:0 -map 0:1 -map_metadata 0  -f hls -hls_list_size 3 -hls_flags delete_segments -hls_time 5 -segment_list_size 3 -hls_segment_filename file%%07d.ts stream.m3u8"
 autostart = true
 startsec = 1
 user = root

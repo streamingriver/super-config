@@ -56,9 +56,7 @@ func TestConnectToNatsShouldFail(t *testing.T) {
 	app.init()
 	app.testing = true
 	app.logger = log.New(writer, "", 0)
-	go func() {
-		app.ConnectToNats()
-	}()
+	app.ConnectToNats()
 	time.Sleep(time.Second)
 
 	if strings.Trim(writer.buff.String(), "\n") != "nats: no servers available for connection" {
@@ -76,9 +74,7 @@ func TestNatsSubscribeShouldFail(t *testing.T) {
 	app.testing = true
 	app.init()
 	app.logger = log.New(writer, "", 0)
-	go func() {
-		app.Subscribe()
-	}()
+	app.Subscribe()
 	time.Sleep(time.Second)
 
 	if strings.Trim(writer.buff.String(), "\n") != "nats: invalid connection" {

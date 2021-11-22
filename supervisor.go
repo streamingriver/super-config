@@ -97,7 +97,7 @@ func (sv *Supervisor) generate(programs []Program, t string) {
 }
 
 func (sv *Supervisor) reload() {
-	cmd := exec.Command(sv.App.SupervisorPath, "reload")
+	cmd := exec.Command(sv.App.SupervisorPath, "-c", sv.App.SupervisorConfig, "reload")
 	_, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Printf("%v", err)

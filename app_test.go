@@ -12,11 +12,11 @@ import (
 func TestApp(t *testing.T) {
 	app := new(App)
 
-	os.Setenv("NATS_URL", "nats-server")
-	os.Setenv("NATS_TOPIC", "nats-topic")
-	os.Setenv("PARSER_TYPE", "cache")
-	os.Setenv("CONFIG_PATH", "etc")
-	os.Setenv("CONFIG_EXT", ".conf")
+	os.Setenv("SC_NATS_URL", "nats-server")
+	os.Setenv("SC_NATS_TOPIC", "nats-topic")
+	os.Setenv("SC_PARSER_TYPE", "cache")
+	os.Setenv("SC_CONFIG_PATH", "etc")
+	os.Setenv("SC_CONFIG_EXT", ".conf")
 
 	app.init()
 
@@ -30,10 +30,10 @@ func TestApp(t *testing.T) {
 		t.Errorf("Wrong parser type %s", app.parserType)
 	}
 	if app.path != "etc" {
-		t.Errorf("Wrong parser type %s", app.parserType)
+		t.Errorf("Wrong parser type %s", app.path)
 	}
 	if app.ext != ".conf" {
-		t.Errorf("Wrong parser type %s", app.parserType)
+		t.Errorf("Wrong parser type %s", app.ext)
 	}
 }
 
@@ -47,9 +47,9 @@ func (mw LogWriter) Write(b []byte) (int, error) {
 	return len(b), nil
 }
 func TestConnectToNatsShouldFail(t *testing.T) {
-	os.Setenv("NATS_URL", "127.0.0.1:4567")
-	os.Setenv("NATS_TOPIC", "nats-topic")
-	os.Setenv("PARSER_TYPE", "cache")
+	os.Setenv("SC_NATS_URL", "127.0.0.1:4567")
+	os.Setenv("SC_NATS_TOPIC", "nats-topic")
+	os.Setenv("SC_PARSER_TYPE", "cache")
 
 	writer := &LogWriter{t, bytes.NewBuffer(nil)}
 	app := new(App)
@@ -65,9 +65,9 @@ func TestConnectToNatsShouldFail(t *testing.T) {
 }
 
 func TestNatsSubscribeShouldFail(t *testing.T) {
-	os.Setenv("NATS_URL", "127.0.0.1:4567")
-	os.Setenv("NATS_TOPIC", "nats-topic")
-	os.Setenv("PARSER_TYPE", "cache")
+	os.Setenv("SC_NATS_URL", "127.0.0.1:4567")
+	os.Setenv("SC_NATS_TOPIC", "nats-topic")
+	os.Setenv("SC_PARSER_TYPE", "cache")
 
 	writer := &LogWriter{t, bytes.NewBuffer(nil)}
 	app := new(App)

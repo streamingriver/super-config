@@ -90,13 +90,16 @@ func (sv *Supervisor) generate(programs []Program, t string) {
 	}
 
 	err := ioutil.WriteFile(sv.App.path+"/"+t+sv.App.ext, []byte(output), 0755)
-	sv.Logger.Printf("%s", err)
+	if err != nil {
+		sv.Logger.Printf("%s", err)
+	}
+	sv.reload()
 }
 
 func (sv *Supervisor) reload() {
 	cmd := exec.Command(sv.App.SupervisorPath, "reload")
 	_, err := cmd.CombinedOutput()
 	if err != nil {
-
+		log.Printf("%v", err)
 	}
 }

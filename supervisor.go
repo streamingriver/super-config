@@ -100,6 +100,6 @@ func (sv *Supervisor) reload() {
 	cmd := exec.Command(sv.App.SupervisorPath, "-c", sv.App.SupervisorConfig, "reload")
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Printf("%v (%s)", errm output)
+		log.Printf("%v (%s)", err, output)
 	}
 }

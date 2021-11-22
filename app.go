@@ -15,11 +15,12 @@ type App struct {
 	logger *log.Logger
 	conn   *nats.Conn
 
-	parser         *Parser
-	parserType     string
-	path           string
-	ext            string
-	SupervisorPath string
+	parser           *Parser
+	parserType       string
+	path             string
+	ext              string
+	SupervisorPath   string
+	SupervisorConfig string
 
 	testing bool
 	exit    chan struct{}
@@ -30,12 +31,13 @@ func (app *App) initLogger() {
 }
 
 func (app *App) getEnvVariables() {
-	app.natsURL = getenvs.GetEnvString("NATS_URL", "nats://nats:4222")
-	app.natsTopic = getenvs.GetEnvString("NATS_TOPIC", "super-config")
-	app.parserType = getenvs.GetEnvString("PARSER_TYPE", "ffmpeg")
-	app.path = getenvs.GetEnvString("CONFIG_PATH", "/etc/supervisor/conf.d/")
-	app.ext = getenvs.GetEnvString("CONFIG_EXT", ".conf")
-	app.SupervisorPath = getenvs.GetEnvString("SUPERVISORCTL", "supervisorctl")
+	app.natsURL = getenvs.GetEnvString("SC_NATS_URL", "nats://nats:4222")
+	app.natsTopic = getenvs.GetEnvString("SC_NATS_TOPIC", "super-config")
+	app.parserType = getenvs.GetEnvString("SC_PARSER_TYPE", "ffmpeg")
+	app.path = getenvs.GetEnvString("SC_CONFIG_PATH", "/etc/supervisor/conf.d/")
+	app.ext = getenvs.GetEnvString("SC_CONFIG_EXT", ".conf")
+	app.SupervisorPath = getenvs.GetEnvString("SC_SUPERVISORCTL", "supervisorctl")
+	app.SupervisorConfig = getenvs.GetEnvString("SC_SUPERVISOR_CONFIG", "/data/conf/supervisor.conf")
 }
 
 //ConnectToNats server

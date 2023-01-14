@@ -2,8 +2,8 @@ package main
 
 import (
 	"io"
-	"io/ioutil"
 	"log"
+	"os"
 	"os/exec"
 	"strings"
 )
@@ -89,7 +89,7 @@ func (sv *Supervisor) generate(programs []Program, t string) {
 		return
 	}
 
-	err := ioutil.WriteFile(sv.App.path+"/"+t+sv.App.ext, []byte(output), 0755)
+	err := os.WriteFile(sv.App.path+"/"+t+sv.App.ext, []byte(output), 0755)
 	if err != nil {
 		sv.Logger.Printf("%s", err)
 	}

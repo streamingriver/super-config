@@ -135,7 +135,7 @@ func TestParserFFMPEG(t *testing.T) {
 	}
 	parser.Parse(programsDataFfmpeg)
 
-	if string(writer.buff.Bytes()) != programsDataFfmpegExpected {
+	if writer.buff.String() != programsDataFfmpegExpected {
 		t.Errorf("Unexpected output, %s", writer.buff.String())
 	}
 }
@@ -151,7 +151,7 @@ func TestParserCache(t *testing.T) {
 	}
 	parser.Parse(programsDataCache)
 
-	if string(writer.buff.Bytes()) != programsDataCacheExpected {
+	if writer.buff.String() != programsDataCacheExpected {
 		t.Errorf("Unexpected output,")
 	}
 }

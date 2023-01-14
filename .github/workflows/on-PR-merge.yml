@@ -1,0 +1,39 @@
+name: "Publish Release"
+
+# The workflow below runs when the release event triggers with a Pull Request is closed and merged.
+# For more information on the release event.
+# See: [Events that trigger workflows](https://docs.github.com/en/actions/reference/events-that-trigger-workflows#release)
+# See: https://localheinz.com/articles/2022/01/24/creating-releases-with-github-actions/
+
+on: 
+  release:
+    types: [created]
+
+jobs:
+  # The the release job will only run if the pull request was also merged
+  release:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+
+    # See: https://github.com/marketplace/actions/github-script
+    - name: "Create release"
+      uses: "actions/github-script@v5"
+      with:
+        github-token: "${{ secrets.GITHUB_TOKEN }}"
+        script: |
+          try {
+            await github.rest.repos.createRelease({
+              draft: true,
+              generate_release_notes: true,
+              name: "latest",
+              owner: context.repo.owner,
+              prerelease: false,
+              repo: context.repo.repo,
+              tag_name: "latest",
+            });
+          } catch (error) {
+            core.setFailed(error.message);
+          }

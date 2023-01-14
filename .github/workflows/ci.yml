@@ -1,18 +1,73 @@
-name: Test and coverage
+name: "Test and coverage"
 
-on: [push, pull_request]
+# The workflow below runs when the release event triggers on Pull Requests and pushes to the main branch.
+# For more information on the release event.
+# See: [Events that trigger workflows](https://docs.github.com/en/actions/reference/events-that-trigger-workflows#release)
+# See: https://localheinz.com/articles/2022/01/24/creating-releases-with-github-actions/
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  build:
+  ci-tests:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v2
+      # See: https://github.com/marketplace/actions/checkout
+      - name: "Checkout repository"
+        uses: actions/checkout@v3
         with:
-          fetch-depth: 2
-      - uses: actions/setup-go@v2
+          # default fetch-depth is insufficent to find previous coverage notes
+          fetch-depth: 10
+
+      # See: https://github.com/marketplace/actions/setup-go-environment
+      - name: "Set up Go"
+        uses: actions/setup-go@v3
         with:
-          go-version: '1.17'
-      - name: Run coverage
-        run: go test -race -coverprofile=coverage.txt -covermode=atomic
-      - name: Upload coverage to Codecov
-        run: bash <(curl -s https://codecov.io/bash)
+          go-version: 1.19
+          cache: true
+
+      # See: https://github.com/marketplace/actions/go-dependency-submission
+      - name: "Submit go dependencies"
+        uses: actions/go-dependency-submission@v1
+        with:
+          go-mod-path: ./go.mod
+          go-build-target: ./main.go
+
+      - name: "Go vet"
+        run: "go vet ./..."
+
+      # See: https://github.com/marketplace/actions/staticcheck
+      - uses: dominikh/staticcheck-action@v1.3.0
+        with:
+          version: "2022.1.3"
+          install-go: false
+
+      - name: "Run tests"
+        run: "go test ./... > test.json"
+
+      # See: https://github.com/marketplace/actions/golang-test-annotations
+      - name: "Annotate tests"
+        if: always()
+        uses: guyarb/golang-test-annotations@v0.5.1
+        with:
+          test-results: test.json
+
+      # See: https://github.com/marketplace/actions/go-coverage
+      - uses: gwatts/go-coverage-action@v1
+        id: coverage
+        with:
+          coverage-threshold: 70
+          fail-coverage: only_pull_requests
+          add-comment: true
+          cover-pkg: ./...
+
+          # Ignore code-generated files when calculating coverage totals
+          ignore-pattern: |
+            \.pb\.go$
+            \_string\.go$

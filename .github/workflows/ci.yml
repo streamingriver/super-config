@@ -1,15 +1,13 @@
 name: "Test and coverage"
 
-# The workflow below runs when the release event triggers on Pull Requests and pushes to the main branch.
+# The workflow below is a resusable workflow.
 # For more information on the release event.
 # See: [Events that trigger workflows](https://docs.github.com/en/actions/reference/events-that-trigger-workflows#release)
 # See: https://localheinz.com/articles/2022/01/24/creating-releases-with-github-actions/
+# See: https://docs.github.com/en/actions/using-workflows/reusing-workflows
 
 on:
-  pull_request:
-  push:
-    branches:
-      - main
+  workflow_call:
 
 # The API requires write permission on the repository to submit dependencies
 permissions:

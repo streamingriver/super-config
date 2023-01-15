@@ -6,19 +6,52 @@ name: "Publish Release"
 # See: https://localheinz.com/articles/2022/01/24/creating-releases-with-github-actions/
 
 on: 
-  release:
-    types: [created]
+  pull_request:
+    types:
+      - closed
 
 jobs:
   # The the release job will only run if the pull request was also merged
   release:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        # build and publish in parallel: linux/386, linux/amd64, linux/arm64, windows/386, windows/amd64, darwin/amd64, darwin/arm64
+        goos: [linux, windows, darwin]
+        goarch: ["386", amd64, arm64]
+        exclude:
+          - goarch: "386"
+            goos: darwin
+          - goarch: arm64
+            goos: windows
+
     permissions:
       contents: write
     steps:
+    # See: https://github.com/marketplace/actions/checkout
+    - name: "Checkout repository"
+      id: checkout_repository
+      uses: actions/checkout@v3
 
-    # See: https://github.com/marketplace/actions/github-script
+    # See: https://github.com/marketplace/actions/get-json-property
+    - name: "Read version from release.json"
+      uses: notiz-dev/github-action-json-property@release
+      id: package_version
+      with:
+        path: 'release.json'
+        prop_path: 'version'
+
+    # See: https://github.com/marketplace/actions/get-json-property
+    - name: Read go_version from release.json
+      uses: notiz-dev/github-action-json-property@release
+      id: go_version
+      with:
+        path: 'release.json'
+        prop_path: 'go_version'
+
+    # See: https://github.com/marketplace/actions/create-release
     - name: "Create release"
       uses: "actions/github-script@v5"
       with:
@@ -28,12 +61,50 @@ jobs:
             await github.rest.repos.createRelease({
               draft: true,
               generate_release_notes: true,
-              name: "latest",
+              name: "v${{ steps.package_version.outputs.prop }}",
               owner: context.repo.owner,
               prerelease: false,
               repo: context.repo.repo,
-              tag_name: "latest",
+              tag_name: "v${{ steps.package_version.outputs.prop }}",
             });
           } catch (error) {
             core.setFailed(error.message);
           }
+
+    # See: https://github.com/marketplace/actions/go-release-binaries
+    - name: "Release versioned binary"
+      uses: wangyoucao577/go-release-action@master
+      with:
+        github_token: ${{ secrets.TOKEN }}
+        goos: ${{ matrix.goos }}
+        goarch: ${{ matrix.goarch }}
+        goversion: "${{ steps.go_version.outputs.prop }}"
+        project_path: "."
+        extra_files: LICENSE README.md
+        sha256sum: true
+        md5sum: true
+        release_name: "v${{ steps.package_version.outputs.prop }}"
+        release_tag: "v${{ steps.package_version.outputs.prop }}"
+        binary_name: "${{ github.repository }}"
+        asset_name: "${{ github.repository }}-${{ matrix.goos }}-${{ matrix.goarch }}"
+        compress_assets: auto
+
+
+    # See: https://github.com/marketplace/actions/go-release-binaries
+    - name: "Release latest binary"
+      uses: wangyoucao577/go-release-action@master
+      with:
+        github_token: ${{ secrets.TOKEN }}
+        goos: ${{ matrix.goos }}
+        goarch: ${{ matrix.goarch }}
+        goversion: "${{ steps.go_version.outputs.prop }}"
+        project_path: "."
+        extra_files: LICENSE README.md
+        sha256sum: true
+        md5sum: true
+        release_name: "latest"
+        release_tag: "latest"
+        binary_name: "${{ github.repository }}"
+        asset_name: "${{ github.repository }}-${{ matrix.goos }}-${{ matrix.goarch }}"
+        compress_assets: auto
+        overwrite: true

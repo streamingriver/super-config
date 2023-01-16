@@ -2,7 +2,7 @@ name: "Publish Release"
 
 # The workflow below runs when the release event triggers with a Pull Request is closed and merged.
 # For more information on the release event.
-# See: [Events that trigger workflows](https://docs.github.com/en/actions/reference/events-that-trigger-workflows#release)
+# See: [Events that trigger workflows](https://docs.github.com/en/actions/reference/events-that-trigger-workflows#pull_request)
 # See: https://localheinz.com/articles/2022/01/24/creating-releases-with-github-actions/
 
 on: 

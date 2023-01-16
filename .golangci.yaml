@@ -1,0 +1,39 @@
+run:
+  skip-dirs:
+    - .github
+
+linters:
+  enable-all: true
+  disable:
+    - deadcode
+    - exhaustivestruct
+    - gochecknoglobals
+    - gochecknoinits
+    - golint
+    - ifshort
+    - interfacer
+    - maligned
+    - nosnakecase
+    - scopelint
+    - structcheck
+    - varcheck
+  presets:
+    - bugs
+    - comment
+    - complexity
+    - error
+    - format
+    - import
+    - metalinter
+    - module
+    - performance
+    - sql
+    - style
+    - test
+    - unused
+issues:
+  # See the dedicated "issues" documentation section.
+  option: value
+severity:
+  # See the dedicated "severity" documentation section.
+  option: value

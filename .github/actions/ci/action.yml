@@ -28,15 +28,43 @@ runs:
         go-mod-path: ./go.mod
         go-build-target: ./main.go
 
-    - name: "Go vet"
-      run: "go vet ./..."
+    # See: https://github.com/marketplace/actions/run-detect-secrets-with-reviewdog
+    - name: "Detect secrets"
+      uses: reviewdog/action-detect-secrets@master
+      with:
+        reporter: github-pr-review
+
+    # See: https://github.com/marketplace/actions/run-languagetool-with-reviewdog
+    - name: "Spellcheck"
+      uses: reviewdog/action-languagetool@v1
+      with:
+        reporter: github-pr-check
+        level: info
+
+    - name: "Install remark-lint presets"
+      run: npm install remark-preset-lint-recommended
       shell: bash
 
-    # See: https://github.com/marketplace/actions/staticcheck
-    - uses: dominikh/staticcheck-action@v1.3.0
+    # See: https://github.com/marketplace/actions/run-remark-lint-with-reviewdog
+    - name: "Markdown lint"
+      uses: reviewdog/action-remark-lint@v5
       with:
-        version: "2022.1.3"
+        reporter: github-pr-check
+        level: info
+
+    # See: https://github.com/marketplace/actions/run-golangci-lint-with-reviewdog
+    - name: "Runs golangci-lint"
+      uses: reviewdog/action-golangci-lint@v2
+      with:
+        go_version: "${{ steps.go_version.outputs.prop }}"
+
+    # See: https://github.com/marketplace/actions/run-staticcheck-with-reviewdog
+    - uses: reviewdog/action-staticcheck@v1
+      with:
+        reporter: github-pr-review
         install-go: false
+        filter_mode: nofilter
+        fail_on_error: true
 
     - name: "Run tests"
       run: "go test -json ./... > test.json"

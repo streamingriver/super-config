@@ -2,8 +2,7 @@ name: "PR Test and coverage"
 
 # The workflow below runs when the release event triggers on not merged Pull Requests.
 # For more information on the release event.
-# See: [Events that trigger workflows](https://docs.github.com/en/actions/reference/events-that-trigger-workflows#release)
-# See: https://localheinz.com/articles/2022/01/24/creating-releases-with-github-actions/
+# See: [Events that trigger workflows](https://docs.github.com/en/actions/reference/events-that-trigger-workflows#pull_request)
 
 on:
   pull_request:
@@ -24,5 +23,19 @@ jobs:
       # See: https://github.com/marketplace/actions/checkout
       - name: "Checkout repository"
         uses: actions/checkout@v3
+
+      # See: https://github.com/marketplace/actions/actionlint-with-reviewdog
+      # See: https://github.com/rhysd/actionlint
+      - name: "Lint GitHub Action Workflows - Checks"
+        uses: reviewdog/action-actionlint@v1
+        with:
+          reporter: github-pr-check
+
+      # See: https://github.com/marketplace/actions/actionlint-with-reviewdog
+      # See: https://github.com/rhysd/actionlint
+      - name: "Lint GitHub Action Workflows - Reviews"
+        uses: reviewdog/action-actionlint@v1
+        with:
+          reporter: github-pr-review
 
       - uses: ./.github/actions/ci

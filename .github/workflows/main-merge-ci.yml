@@ -11,5 +11,18 @@ on:
       - main
 
 jobs:
-  call-another-reusable:
-    uses: ./.github/ci.yml
+  test-and-coverage:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      
+    name: "Tests for merge to main branch"
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+    
+    # See: https://github.com/marketplace/actions/checkout
+    - name: "Checkout repository"
+      uses: actions/checkout@v3
+
+    - uses: ./.github/workflows/ci.yml

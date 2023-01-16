@@ -1,0 +1,110 @@
+name: "Publish Package"
+
+# The workflow below runs when the release event triggers with a Pull Request is closed and merged.
+# For more information on the release event.
+# See: [Events that trigger workflows](https://docs.github.com/en/actions/reference/events-that-trigger-workflows#release)
+# See: https://localheinz.com/articles/2022/01/24/creating-releases-with-github-actions/
+
+on: 
+  workflow_call:
+    inputs:
+        goos: 
+          name: 'OS to build'
+          default: 'linux'
+          required: true
+          type: string
+        goarch: 
+          name: 'Architecture to build'
+          default: 'amd64'
+          required: true
+          type: string
+
+permissions:
+  contents: write
+  package: write
+  pull-requests: write
+
+jobs:
+  # The the release job will only run if the pull request was also merged
+  release:
+    name: "Release package"
+    steps:
+    
+    # See: https://github.com/marketplace/actions/checkout
+    - name: "Checkout repository"
+      id: checkout_repository
+      uses: actions/checkout@v3
+
+    # See: https://github.com/marketplace/actions/get-json-property
+    - name: "Read version from release.json"
+      uses: notiz-dev/github-action-json-property@release
+      id: package_version
+      with:
+        path: 'release.json'
+        prop_path: 'version'
+
+    # See: https://github.com/marketplace/actions/get-json-property
+    - name: Read go_version from release.json
+      uses: notiz-dev/github-action-json-property@release
+      id: go_version
+      with:
+        path: 'release.json'
+        prop_path: 'go_version'
+
+    # See: https://github.com/marketplace/actions/create-release
+    - name: "Create release"
+      uses: "actions/github-script@v5"
+      with:
+        github-token: "${{ secrets.GITHUB_TOKEN }}"
+        script: |
+          try {
+            await github.rest.repos.createRelease({
+              draft: true,
+              generate_release_notes: true,
+              name: "v${{ steps.package_version.outputs.prop }}",
+              owner: context.repo.owner,
+              prerelease: false,
+              repo: context.repo.repo,
+              tag_name: "v${{ steps.package_version.outputs.prop }}",
+            });
+          } catch (error) {
+            core.setFailed(error.message);
+          }
+
+    # See: https://github.com/marketplace/actions/go-release-binaries
+    - name: "Release versioned binary"
+      uses: wangyoucao577/go-release-action@master
+      with:
+        github_token: ${{ secrets.TOKEN }}
+        goos: ${{ inputs.goos }}
+        goarch: ${{ inputs.goarch }}
+        goversion: "${{ steps.go_version.outputs.prop }}"
+        project_path: "."
+        extra_files: LICENSE README.md
+        sha256sum: true
+        md5sum: true
+        release_name: "v${{ steps.package_version.outputs.prop }}"
+        release_tag: "v${{ steps.package_version.outputs.prop }}"
+        binary_name: "${{ github.repository }}"
+        asset_name: "${{ github.repository }}-${{ inputs.goos }}-${{ inputs.goarch }}"
+        compress_assets: auto
+
+
+    # See: https://github.com/marketplace/actions/go-release-binaries
+    - name: "Release latest binary"
+      uses: wangyoucao577/go-release-action@master
+      with:
+        github_token: ${{ secrets.TOKEN }}
+        goos: ${{ inputs.goos }}
+        goarch: ${{ inputs.goarch }}
+        goversion: "${{ steps.go_version.outputs.prop }}"
+        project_path: "."
+        extra_files: LICENSE README.md
+        sha256sum: true
+        md5sum: true
+        release_name: "latest"
+        release_tag: "latest"
+        binary_name: "${{ github.repository }}"
+        asset_name: "${{ github.repository }}-${{ inputs.goos }}-${{ inputs.goarch }}"
+        compress_assets: auto
+        overwrite: true

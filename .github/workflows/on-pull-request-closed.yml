@@ -29,11 +29,10 @@ jobs:
         id: checkout_repository
         uses: actions/checkout@v3
 
-      # See: https://github.com/marketplace/actions/create-release
+      # See: https://github.com/marketplace/actions/github-script
       - name: "Create release"
         uses: "actions/github-script@v5"
         with:
-          github-token: "${{ inputs.token }}"
           script: |
             try {
               const { repo: { owner, repo } } = context;
@@ -64,11 +63,10 @@ jobs:
           path: "release.json"
           prop_path: "version"
 
-      # See: https://github.com/marketplace/actions/create-release
+      # See: https://github.com/marketplace/actions/github-script
       - name: "Create release"
         uses: "actions/github-script@v5"
         with:
-          github-token: "${{ inputs.token }}"
           script: |
             try {
               const { repo: { owner, repo } } = context;

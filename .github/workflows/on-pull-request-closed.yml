@@ -1,0 +1,89 @@
+name: "Publish Release"
+
+# The workflow below runs when the release event triggers with a Pull Request is closed and merged.
+# For more information on the release event.
+# See: [Events that trigger workflows](https://docs.github.com/en/actions/reference/events-that-trigger-workflows#release)
+# See: https://localheinz.com/articles/2022/01/24/creating-releases-with-github-actions/
+
+on: 
+  pull_request:
+    types:
+      - closed
+
+jobs:
+  release-linux:
+    # The the release job will only run if the pull request was also merged
+    if: github.event.pull_request.merged == true
+    name: "Create release"
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      packages: write
+      pull-requests: write
+
+    steps:
+
+      # See: https://github.com/marketplace/actions/checkout
+      - name: "Checkout repository"
+        id: checkout_repository
+        uses: actions/checkout@v3
+
+      # See: https://github.com/marketplace/actions/create-release
+      - name: "Create release"
+        uses: "actions/github-script@v5"
+        with:
+          github-token: "${{ inputs.token }}"
+          script: |
+            try {
+              const { repo: { owner, repo } } = context;
+              const tag = "latest";
+
+              const existing = await github.rest.repos.getReleaseByTag({
+                owner,
+                repo,
+                tag,
+              });
+             
+              await github.rest.repos.updateRelease({
+                owner,
+                repo,
+                release_id: existing.data.id,
+                make_latest: false
+                target_commitis: "main",
+              });
+            } catch (error) {
+              core.setFailed(error.message);
+            }
+
+      # See: https://github.com/marketplace/actions/get-json-property
+      - name: "Read version from release.json"
+        uses: notiz-dev/github-action-json-property@release
+        id: package_version
+        with:
+          path: "release.json"
+          prop_path: "version"
+
+      # See: https://github.com/marketplace/actions/create-release
+      - name: "Create release"
+        uses: "actions/github-script@v5"
+        with:
+          github-token: "${{ inputs.token }}"
+          script: |
+            try {
+              const { repo: { owner, repo } } = context;
+              const tag = "v${{ steps.package_version.outputs.prop }}";
+
+              await github.rest.repos.createRelease({
+                owner,
+                repo,
+                generate_release_notes: true,
+                name: tag,
+                tag_name: tag,
+                make_latest: true
+                prerelease: false,
+                draft: true,
+              });
+            } catch (error) {
+              core.setFailed(error.message);
+            }

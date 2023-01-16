@@ -1,6 +1,6 @@
 name: "Tests"
 
-# The workflow below runs when the release event triggers on Pull Requests and pushes to the main branch.
+# The workflow below runs when the release event triggers on pushes to the main branch.
 # For more information on the release event.
 # See: [Events that trigger workflows](https://docs.github.com/en/actions/reference/events-that-trigger-workflows#release)
 # See: https://localheinz.com/articles/2022/01/24/creating-releases-with-github-actions/

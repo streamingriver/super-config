@@ -1,6 +1,6 @@
 name: "PR Test and coverage"
 
-# The workflow below runs when the release event triggers on Pull Requests and pushes to the main branch.
+# The workflow below runs when the release event triggers on not merged Pull Requests.
 # For more information on the release event.
 # See: [Events that trigger workflows](https://docs.github.com/en/actions/reference/events-that-trigger-workflows#release)
 # See: https://localheinz.com/articles/2022/01/24/creating-releases-with-github-actions/
@@ -10,15 +10,15 @@ on:
 
 jobs:
   test-and-coverage:
+    # The the release job will only run if the pull request is merged
+    if: ${{ github.ref != 'refs/heads/main' && github.event.pull_request.merged != true }}
+    name: "Tests for Pull Requests"
     runs-on: ubuntu-latest
 
     permissions:
       contents: write
       pull-requests: write
 
-    name: "Tests for Pull Requests"
-    if: ${{ github.ref != 'refs/heads/main' || github.event.pull_request.merged != true }}
-    
     steps:
     
       # See: https://github.com/marketplace/actions/checkout

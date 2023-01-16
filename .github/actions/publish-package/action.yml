@@ -1,4 +1,3 @@
-
 name: "Release Go binary package"
 author: "Alexandre Marcondes <alexandre.marcondes@gmail.com>"
 description: "Build and Release Go Binaries to GitHub Release Assets"
@@ -7,19 +6,28 @@ inputs:
   token:
     description: "GITHUB_TOKEN for uploading releases to Github assets."
     required: true
+    type: string
     default:  ${{ github.token }}
   repository:
     description: "Repository name."
     required: true
+    type: string
     default: ${{ github.repository }}
   goos:
     description: "GOOS is the running programs operating system target: one of darwin, windows, linux, and so on."
     required: true
+    type: string
     default: "linux"
   goarch:
     description: "GOARCH is the running programs architecture target: one of 386, amd64, arm, arm64, and so on."
     required: true
+    type: string
     default: "amd64"
+  extension:
+    description: "Binary filename extension, like '.exe' for windows."
+    required: true
+    type: string
+    default: ""
 
 runs:
   using: "composite"
@@ -41,28 +49,8 @@ runs:
         path: "release.json"
         prop_path: "go_version"
 
-    # See: https://github.com/marketplace/actions/create-release
-    - name: "Create release"
-      uses: "actions/github-script@v5"
-      with:
-        github-token: "${{ inputs.token }}"
-        script: |
-          try {
-            await github.rest.repos.createRelease({
-              draft: true,
-              generate_release_notes: true,
-              name: "v${{ steps.package_version.outputs.prop }}",
-              owner: context.repo.owner,
-              prerelease: false,
-              repo: context.repo.repo,
-              tag_name: "v${{ steps.package_version.outputs.prop }}",
-            });
-          } catch (error) {
-            core.setFailed(error.message);
-          }
-
     # See: https://github.com/marketplace/actions/go-release-binaries
-    - name: "Release versioned binary"
+    - name: "Release binary"
       uses: wangyoucao577/go-release-action@master
       with:
         github_token: ${{ inputs.token }}
@@ -75,26 +63,7 @@ runs:
         md5sum: true
         release_name: "v${{ steps.package_version.outputs.prop }}"
         release_tag: "v${{ steps.package_version.outputs.prop }}"
-        binary_name: "${{ inputs.repository }}"
-        asset_name: "${{ inputs.repository }}-${{ inputs.goos }}-${{ inputs.goarch }}"
-        compress_assets: auto
-
-
-    # See: https://github.com/marketplace/actions/go-release-binaries
-    - name: "Release latest binary"
-      uses: wangyoucao577/go-release-action@master
-      with:
-        github_token: ${{ inputs.token }}
-        goos: ${{ inputs.goos }}
-        goarch: ${{ inputs.goarch }}
-        goversion: "${{ steps.go_version.outputs.prop }}"
-        project_path: "."
-        extra_files: LICENSE README.md
-        sha256sum: true
-        md5sum: true
-        release_name: "latest"
-        release_tag: "latest"
-        binary_name: "${{ inputs.repository }}"
+        binary_name: "${{ inputs.repository }}${{ inputs.extension }}"
         asset_name: "${{ inputs.repository }}-${{ inputs.goos }}-${{ inputs.goarch }}"
         compress_assets: auto
         overwrite: true

@@ -1,19 +1,20 @@
-name: "Publish Release"
+name: "Submit release assets"
 
-# The workflow below runs when the release event triggers with a Pull Request is closed and merged.
+# The workflow below runs when the release event triggers when releases are created.
 # For more information on the release event.
 # See: [Events that trigger workflows](https://docs.github.com/en/actions/reference/events-that-trigger-workflows#release)
 # See: https://localheinz.com/articles/2022/01/24/creating-releases-with-github-actions/
 
-on: 
-  pull_request:
+on:
+  release:
     types:
-      - closed
+      - created
+      - edited
 
 jobs:
   release-linux:
-    # The the release job will only run if the pull request was also merged
-    if: github.event.pull_request.merged == true
+    # The the release job will only run if a release is created or if the latest release is edited/updated
+    if: ${{ github.event.release.action == 'created' || ( github.event.release.action == 'edited' && github.event.release.release.tag_name == 'latest' ) }}
     name: "Publish Linux packages"
     runs-on: ubuntu-latest
 
@@ -38,13 +39,13 @@ jobs:
         with:
           goos: ${{ matrix.goos }}
           goarch: ${{ matrix.goarch }}
-          secrets: inherit
+          extension: ""
 
   release-macos:
-    # The the release job will only run if the pull request was also merged
-    if: github.event.pull_request.merged == true
+    # The the release job will only run if a release is created or if the latest release is edited/updated
+    if: ${{ github.event.release.action == 'created' || ( github.event.release.action == 'edited' && github.event.release.release.tag_name == 'latest' ) }}
     name: "Publish macOS packages"
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
 
     strategy:
       matrix:
@@ -67,13 +68,13 @@ jobs:
         with:
           goos: ${{ matrix.goos }}
           goarch: ${{ matrix.goarch }}
-          secrets: inherit
+          extension: ""
 
   release-windows:
-    # The the release job will only run if the pull request was also merged
-    if: github.event.pull_request.merged == true
+    # The the release job will only run if a release is created or if the latest release is edited/updated
+    if: ${{ github.event.release.action == 'created' || ( github.event.release.action == 'edited' && github.event.release.tag_name == 'latest' ) }}
     name: "Publish Windows packages"
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     strategy:
       matrix:
@@ -96,4 +97,4 @@ jobs:
         with:
           goos: ${{ matrix.goos }}
           goarch: ${{ matrix.goarch }}
-          secrets: inherit
+          extension: ".exe"

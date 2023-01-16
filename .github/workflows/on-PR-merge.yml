@@ -11,7 +11,6 @@ on:
       - closed
 
 jobs:
-
   release-linux:
     # The the release job will only run if the pull request was also merged
     if: github.event.pull_request.merged == true
@@ -31,15 +30,15 @@ jobs:
 
     steps:
     
-    # See: https://github.com/marketplace/actions/checkout
-    - name: "Checkout repository"
-      uses: actions/checkout@v3
+      # See: https://github.com/marketplace/actions/checkout
+      - name: "Checkout repository"
+        uses: actions/checkout@v3
 
-    - uses: ./.github/workflows/ackage-publish.yml
-      with:
-        goos: ${{ matrix.goos }}
-        goarch: ${{ matrix.goarch }}
-      secrets: inherit
+      - uses: ./.github/actions/publish-package
+        with:
+          goos: ${{ matrix.goos }}
+          goarch: ${{ matrix.goarch }}
+        secrets: inherit
 
   release-macos:
     # The the release job will only run if the pull request was also merged
@@ -60,15 +59,15 @@ jobs:
 
     steps:
     
-    # See: https://github.com/marketplace/actions/checkout
-    - name: "Checkout repository"
-      uses: actions/checkout@v3
+      # See: https://github.com/marketplace/actions/checkout
+      - name: "Checkout repository"
+        uses: actions/checkout@v3
 
-    - uses: ./.github/workflows/ackage-publish.yml
-      with:
-        goos: ${{ matrix.goos }}
-        goarch: ${{ matrix.goarch }}
-      secrets: inherit
+      - uses: ./.github/actions/publish-package
+        with:
+          goos: ${{ matrix.goos }}
+          goarch: ${{ matrix.goarch }}
+        secrets: inherit
 
   release-windows:
     # The the release job will only run if the pull request was also merged
@@ -89,12 +88,12 @@ jobs:
 
     steps:
     
-    # See: https://github.com/marketplace/actions/checkout
-    - name: "Checkout repository"
-      uses: actions/checkout@v3
+      # See: https://github.com/marketplace/actions/checkout
+      - name: "Checkout repository"
+        uses: actions/checkout@v3
 
-    - uses: ./.github/workflows/ackage-publish.yml
-      with:
-        goos: ${{ matrix.goos }}
-        goarch: ${{ matrix.goarch }}
-      secrets: inherit
+      - uses: ./.github/actions/publish-package
+        with:
+          goos: ${{ matrix.goos }}
+          goarch: ${{ matrix.goarch }}
+        secrets: inherit

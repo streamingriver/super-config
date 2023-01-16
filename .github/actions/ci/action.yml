@@ -1,0 +1,65 @@
+
+name: "Release Go binary package"
+author: "Alexandre Marcondes <alexandre.marcondes@gmail.com>"
+description: "Build and Release Go Binaries to GitHub Release Assets"
+
+runs:
+  using: "composite"
+  steps:
+
+    # See: https://github.com/marketplace/actions/get-json-property
+    - name: Read go_version from release.json
+      uses: notiz-dev/github-action-json-property@release
+      id: go_version
+      with:
+        path: "release.json"
+        prop_path: "go_version"
+
+    # See: https://github.com/marketplace/actions/setup-go-environment
+    - name: "Set up Go"
+      uses: actions/setup-go@v3
+      with:
+        go-version: "${{ steps.go_version.outputs.prop }}"
+        cache: true
+
+    # See: https://github.com/marketplace/actions/go-dependency-submission
+    - name: "Submit go dependencies"
+      uses: actions/go-dependency-submission@v1
+      with:
+        go-mod-path: ./go.mod
+        go-build-target: ./main.go
+
+    - name: "Go vet"
+      run: "go vet ./..."
+      shell: bash
+
+    # See: https://github.com/marketplace/actions/staticcheck
+    - uses: dominikh/staticcheck-action@v1.3.0
+      with:
+        version: "2022.1.3"
+        install-go: false
+
+    - name: "Run tests"
+      run: "go test -json ./... > test.json"
+      shell: bash
+
+    # See: https://github.com/marketplace/actions/golang-test-annotations
+    - name: "Annotate tests"
+      if: always()
+      uses: guyarb/golang-test-annotations@v0.5.1
+      with:
+        test-results: test.json
+
+    # See: https://github.com/marketplace/actions/go-coverage
+    - uses: gwatts/go-coverage-action@v1
+      id: coverage
+      with:
+        coverage-threshold: 70
+        fail-coverage: only_pull_requests
+        add-comment: true
+        cover-pkg: ./...
+
+        # Ignore code-generated files when calculating coverage totals
+        ignore-pattern: |
+          \.pb\.go$
+          \_string\.go$

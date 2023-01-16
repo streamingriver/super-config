@@ -48,7 +48,7 @@ jobs:
                 owner,
                 repo,
                 release_id: existing.data.id,
-                make_latest: false
+                make_latest: false,
                 target_commitis: "main",
               });
             } catch (error) {
@@ -78,7 +78,7 @@ jobs:
                 generate_release_notes: true,
                 name: tag,
                 tag_name: tag,
-                make_latest: true
+                make_latest: true,
                 prerelease: false,
                 draft: true,
               });

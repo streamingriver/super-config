@@ -7,11 +7,11 @@ inputs:
   token:
     description: "GITHUB_TOKEN for uploading releases to Github assets."
     required: true
-    default: "${{ secrets.GITHUB_TOKEN }}"
+    default:  ${{ github.token }}
   repository:
     description: "Repository name."
     required: true
-    default: "${{ github.repository }}"
+    default: ${{ github.repository }}
   goos:
     description: "GOOS is the running programs operating system target: one of darwin, windows, linux, and so on."
     required: true

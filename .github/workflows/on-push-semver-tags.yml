@@ -13,7 +13,15 @@ on:
 
 jobs:
   update-semver:
+    name: "Get version information and update tags"
     runs-on: ubuntu-latest
+
+    outputs:
+      package_version: ${{ steps.go_version.outputs.prop }}
+      go_version: ${{ steps.go_version.outputs.prop }}
+    
+    permissions:
+      contents: write
 
     steps:
 
@@ -22,78 +30,49 @@ jobs:
         id: checkout_repository
         uses: actions/checkout@v3
 
+        # See: https://github.com/marketplace/actions/get-json-property
+      - name: "Read version from release.json"
+        uses: notiz-dev/github-action-json-property@release
+        id: package_version
+        with:
+          path: "release.json"
+          prop_path: "version"
+
+      # See: https://github.com/marketplace/actions/get-json-property
+      - name: Read go_version from release.json
+        uses: notiz-dev/github-action-json-property@release
+        id: go_version
+        with:
+          path: "release.json"
+          prop_path: "go_version"
+
       # See: https://github.com/marketplace/actions/update-major-minor-semver
       - name: "Update major/minor release"
         uses: haya14busa/action-update-semver@v1
 
-  release-linux:
-    needs: update-semver
-    name: "Publish Linux packages"
+  release:
+    name: "Publish packages"
     runs-on: ubuntu-latest
+    needs: update-semver
 
     strategy:
       matrix:
-        # build and publish in parallel: linux/386, linux/amd64, linux/arm64
-        goos: [linux]
-        goarch: ["386", amd64, arm64]
-
-    permissions:
-      contents: write
-      packages: write
-      pull-requests: write
-
-    steps:
-    
-      # See: https://github.com/marketplace/actions/checkout
-      - name: "Checkout repository"
-        uses: actions/checkout@v3
-
-      - uses: ./.github/actions/publish-package
-        with:
-          goos: ${{ matrix.goos }}
-          goarch: ${{ matrix.goarch }}
-          extension: ""
-          tag: ${{ github.ref_name }}
-
-  release-macos:
-    needs: update-semver
-    name: "Publish macOS packages"
-    runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        # build and publish in parallel: darwin/amd64, darwin/arm64
-        goos: [darwin]
-        goarch: [amd64, arm64]
-
-    permissions:
-      contents: write
-      packages: write
-      pull-requests: write
-
-    steps:
-    
-      # See: https://github.com/marketplace/actions/checkout
-      - name: "Checkout repository"
-        uses: actions/checkout@v3
-
-      - uses: ./.github/actions/publish-package
-        with:
-          goos: ${{ matrix.goos }}
-          goarch: ${{ matrix.goarch }}
-          extension: ""
-          tag: ${{ github.ref_name }}
-
-  release-windows:
-    needs: update-semver
-    name: "Publish Windows packages"
-    runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        # build and publish in parallel: windows/386, windows/amd64
-        goos: [windows]
+        # build and publish in parallel: linux/386, linux/amd64, linux/arm64, darwin/amd64, darwin/arm64, windows/386, windows/amd64
+        goos: [linux, windows, darwin]
         goarch: ["386", amd64]
+        exclude:
+          # windows/386 and darwin/386 seems useless 
+          - goarch: "386"
+            goos: windows
+          - goarch: "386"
+            goos: darwin
+        include:
+          - goarch: linux
+            extension: ""
+          - goarch: darwin
+            extension: ""
+          - goarch: windows
+            extension: ".exe"
 
     permissions:
       contents: write
@@ -101,14 +80,26 @@ jobs:
       pull-requests: write
 
     steps:
-    
+
       # See: https://github.com/marketplace/actions/checkout
       - name: "Checkout repository"
+        id: checkout
         uses: actions/checkout@v3
 
-      - uses: ./.github/actions/publish-package
+      # See: https://github.com/marketplace/actions/go-release-binaries
+      - name: "Release binary"
+        uses: wangyoucao577/go-release-action@master
         with:
           goos: ${{ matrix.goos }}
           goarch: ${{ matrix.goarch }}
-          extension: ".exe"
-          tag: ${{ github.ref_name }}
+          goversion: "${{ needs.update-semver.outputs.go_version }}"
+          project_path: "."
+          extra_files: LICENSE README.md
+          sha256sum: true
+          md5sum: true
+          release_name: "${{ github.ref_name }}"
+          release_tag: "${{ github.ref_name }}"
+          binary_name: "${{ github.repository }}${{ matrix.extension }}"
+          asset_name: "${{ github.repository }}-${{ matrix.goos }}-${{ matrix.goarch }}-v{{ needs.update-semver.outputs.package_version }}"
+          compress_assets: auto
+          overwrite: true

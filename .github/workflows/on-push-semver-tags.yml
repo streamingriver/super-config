@@ -60,6 +60,29 @@ jobs:
         with:
           description: "Lasted version"
 
+      # See: https://github.com/marketplace/actions/github-script
+      - name: "Create release"
+        uses: "actions/github-script@v5"
+        with:
+          script: |
+            try {
+              const { repo: { owner, repo } } = context;
+              const tag = "latest";
+
+              await github.rest.repos.createRelease({
+                owner,
+                repo,
+                generate_release_notes: true,
+                name: tag,
+                tag_name: tag,
+                make_latest: "false",
+                prerelease: false,
+                draft: true,
+              });
+            } catch (error) {
+              core.setFailed(error.message);
+            }
+
   release:
     name: "Publish packages"
     runs-on: ubuntu-latest
@@ -112,6 +135,6 @@ jobs:
           release_name: "${{ github.ref_name }}"
           release_tag: "${{ github.ref_name }}"
           binary_name: "${{ github.repository }}${{ matrix.extension }}"
-          asset_name: "${{ github.repository }}-${{ matrix.goos }}-${{ matrix.goarch }}-v{{ needs.update-semver.outputs.package_version }}"
+          asset_name: "${{ github.repository }}-${{ matrix.goos }}-${{ matrix.goarch }}-v${{ needs.update-semver.outputs.package_version }}"
           compress_assets: auto
           overwrite: true

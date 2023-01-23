@@ -105,6 +105,6 @@ jobs:
           release_name: "${{ github.ref_name }}"
           release_tag: "${{ github.ref_name }}"
           binary_name: "${{ github.repository }}${{ matrix.extension }}"
-          asset_name: "${{ github.repository }}-${{ matrix.goos }}-${{ matrix.goarch }}-v{{ needs.get-information.outputs.package_version }}"
+          asset_name: "${{ github.repository }}-${{ matrix.goos }}-${{ matrix.goarch }}-v${{ needs.get-information.outputs.package_version }}"
           compress_assets: auto
           overwrite: true

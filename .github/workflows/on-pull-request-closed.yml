@@ -44,12 +44,10 @@ jobs:
                 tag,
               });
              
-              await github.rest.repos.updateRelease({
+              await github.rest.repos.deleteRelease({
                 owner,
                 repo,
                 release_id: existing.data.id,
-                make_latest: "false",
-                target_commitis: "main",
               });
             } catch (error) {
               core.setFailed(error.message);

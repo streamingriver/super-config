@@ -30,12 +30,17 @@ jobs:
         uses: reviewdog/action-actionlint@v1
         with:
           reporter: github-pr-check
+          fail_on_error: false
 
       # See: https://github.com/marketplace/actions/actionlint-with-reviewdog
       # See: https://github.com/rhysd/actionlint
       - name: "Lint GitHub Action Workflows - Reviews"
         uses: reviewdog/action-actionlint@v1
         with:
+          actionlint_flags: -ignore "undefined variable \"vars\""
           reporter: github-pr-review
+
+      # See: https://github.com/marketplace/actions/reviewdog-suggester-suggest-any-code-changes-based-on-diff-with-reviewdog
+      - uses: reviewdog/action-suggester@v1
 
       - uses: ./.github/actions/ci
